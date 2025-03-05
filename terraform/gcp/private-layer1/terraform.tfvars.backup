@@ -1,6 +1,10 @@
-project    = "klayspray"
-project_id = var.project_id
-gcp_region = "asia-northeast3"
+project    = "klayspray-yumiel-test"
+project_id = "klaytn-platform-dev"
+gcp_region = "asia-southeast1"
+network    = "platform-dev-vpc"
+subnetwork = "platform-dev-public-sg-subnet"
+network_tags = ["ssh", "klaytn-metrics", "klaytn-rpc", "load-test", "grafana"]
+create_gcp_key_pair = false
 
 name           = "klayspray-yumiel-test"
 ssh_client_ips = ["0.0.0.0/0"]
@@ -34,6 +38,3 @@ monitor_options = {
   boot_disk_size = 30
   # compute_disk_size = 100
 }
-
-org_id = "YOUR_ORG_ID"  # Replace with your organization ID
-billing_account = "YOUR_BILLING_ACCOUNT"  # Replace with your billing account ID

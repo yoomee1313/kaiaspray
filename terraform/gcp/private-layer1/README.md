@@ -1,18 +1,27 @@
 # Deploy Private Layer1 Network on GCP
-
-### 1. Deploy GCP resources
+### 0. Prerequisites
 > :warning: Before running the following commands, please get GCP credentials using command below.
+
+Option1.
+```bash
+gcloud auth application-default login
+```
+
+Option2.
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="<path-to-credential-json>"
 ```
 
+### 1. Deploy GCP resources
 Execute command belows to deploy resources via Terraform.
 ```bash
 $ git clone https://github.com/klaytn/klayspray.git
 $ cd klayspray
 $ export TF_OPTIONS="-chdir=terraform/gcp/private-layer1"
 $ terraform $TF_OPTIONS init
+$ terraform $TF_OPTIONS plan
 $ terraform $TF_OPTIONS apply -auto-approve
+$ terraform $TF_OPTIONS destroy -auto-approve
 ```
 
 terraform output will be shown like the below.
