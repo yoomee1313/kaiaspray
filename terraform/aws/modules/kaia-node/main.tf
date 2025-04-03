@@ -23,7 +23,7 @@ resource "aws_instance" "this" {
 resource "aws_eip" "this" {
   count = var.use_eip ? 1 : 0
 
-  vpc = true
+  domain = "vpc"
 
   tags = merge(var.tags, {
     Name = var.name
