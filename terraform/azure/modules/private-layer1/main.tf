@@ -78,7 +78,7 @@ module "monitor" {
   os_disk = {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
-    disk_size_gb         = local.en_options.os_disk_size
+    disk_size_gb         = local.monitor_options.os_disk_size
   }
 
   tags = local.default_tags

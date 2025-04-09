@@ -4,10 +4,10 @@ locals {
   key_name = module.keypair.key_name
 
   source_image_reference = {
-    publisher = data.azurerm_platform_image.centos.publisher
-    offer     = data.azurerm_platform_image.centos.offer
-    sku       = data.azurerm_platform_image.centos.sku
-    version   = data.azurerm_platform_image.centos.version
+    publisher = data.azurerm_platform_image.rocky.publisher
+    offer     = data.azurerm_platform_image.rocky.offer
+    sku       = data.azurerm_platform_image.rocky.sku
+    version   = data.azurerm_platform_image.rocky.version
   }
 
   default_tags = merge(

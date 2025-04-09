@@ -6,6 +6,16 @@
 az login
 ```
 
+> :warning: If you don't have a resource group named 'Kaiaspray', create it using the command below.
+```bash
+az group create --name Kaiaspray --location koreacentral
+```
+
+> :warning: Azure Limitations
+> - Plan information is required when using Marketplace images. Check the image information and add plan information if necessary.
+> - The default core quota in Korea Central region is limited to 4 cores. Request a quota increase if you need more cores.
+> - The number of Public IP addresses per region per subscription is limited to 3. Request a quota increase if you need more Public IPs.
+
 Execute command belows to deploy resources via Terraform.
 ```bash
 $ git clone https://github.com/kaiachain/kaiaspray.git
