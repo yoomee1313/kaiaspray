@@ -8,6 +8,12 @@ resource "azurerm_linux_virtual_machine" "this" {
     azurerm_network_interface.this.id,
   ]
 
+  plan {
+    name      = var.source_image_reference.sku
+    product   = var.source_image_reference.offer
+    publisher = var.source_image_reference.publisher
+  }
+
   admin_ssh_key {
     username   = "kaia"
     public_key = var.public_key
