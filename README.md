@@ -12,6 +12,7 @@ Deploy a Kaia network!
         - [AWS - Click to check the complete guide](#aws---click-to-check-the-complete-guide)
         - [GCP - Click to check the complete guide](#gcp---click-to-check-the-complete-guide)
         - [Azure - Click to check the complete guide](#azure---click-to-check-the-complete-guide)
+        - [Local deploy - Click to check the complete guide](#local-deploy---click-to-check-the-complete-guide)
 
 ## Supported Cloud Providers
 * AWS
@@ -59,3 +60,11 @@ $ export TF_OPTIONS="-chdir=terraform/azure/private-layer1"
 $ terraform $TF_OPTIONS init
 $ terraform $TF_OPTIONS apply -auto-approve
 $ ansible-playbook -i inventory/private-layer1/inventory.ini private-layer1.yaml
+```
+
+##### Local deploy - [Click to check the complete guide](local-deploy/README.md)
+```bash
+$ cd local-deploy
+$ ./1.prepare.sh
+$ ./2.start.sh
+```

@@ -1,0 +1,9 @@
+kaia_node_type: ${kaia_node_type}
+
+# chaindata timestamp, ref: https://packages.kaia.io/kairos/chaindata/
+kaia_chaindata_timestamp: ${kaia_chaindata_timestamp}
+kaia_bridge_enabled: ${kaia_bridge_enabled}
+kaia_conf_override:
+%{ for key, value in kaia_conf_override_en ~}
+  ${key}: ${value}
+%{ endfor ~} 

@@ -39,6 +39,12 @@ variable "ssh_client_ips" {
   default     = []
 }
 
+variable "deploy_options" {
+  type        = any
+  description = "The options to deploy kaia nodes"
+  default     = {}
+}
+
 variable "cn_options" {
   type        = any
   description = "The options to deploy CN nodes"

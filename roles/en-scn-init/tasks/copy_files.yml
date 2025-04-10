@@ -17,48 +17,44 @@
 
 - name: Download the latest chaindata from packages.kaia.io
   become: yes 
-  command: "curl -o chaindata.tar.gz https://packages.kaia.io/{{ kaia_conf.NETWORK }}/chaindata/kaia-{{ kaia_conf.NETWORK }}-chaindata-{{ kaia_chaindata_timestamp }}.tar.gz"
-  args:
-    chdir: "{{ kaia_conf.DATA_DIR }}"
-  async: 7200
-  poll: 0
-  register: download_job
-  when: not check_chaindata_compress_file.stat.exists
-  tags:
-    - chaindata
-
-- name: Check on an async task for downloading chaindata
-  become: yes 
-  async_status:
-    jid: "{{ download_job.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  retries: 20000
+  get_url:
+    url: "https://packages.kaia.io/{{ kaia_conf.NETWORK }}/chaindata/kaia-{{ kaia_conf.NETWORK }}-chaindata-{{ kaia_chaindata_timestamp }}.tar.gz"
+    dest: "{{ kaia_conf.DATA_DIR }}/chaindata.tar.gz"
+    mode: '0644'
+    force: yes
+    validate_certs: no
+  register: download_result
+  retries: 3
   delay: 5
+  until: download_result is success
   when: not check_chaindata_compress_file.stat.exists
   tags:
     - chaindata
 
-- name: Unarchive 
+- name: Verify downloaded chaindata file
   become: yes
-  command: tar xf chaindata.tar.gz
-  args:
-    chdir: "{{ kaia_conf.DATA_DIR }}"
-  async: 3600
-  poll: 0
-  register: unarchive_job
+  command: "file {{ kaia_conf.DATA_DIR }}/chaindata.tar.gz"
+  register: file_check
+  changed_when: false
   when: not check_chaindata_compress_file.stat.exists
   tags:
     - chaindata
 
-- name: Check on an async task for unarchiving chaindata
-  become: yes 
-  async_status:
-    jid: "{{ unarchive_job.ansible_job_id }}"
-  register: job_result
-  until: job_result.finished
-  retries: 10000
-  delay: 5
+- name: Fail if downloaded file is not a valid gzip archive
+  fail:
+    msg: "Downloaded file is not a valid gzip archive"
+  when: 
+    - not check_chaindata_compress_file.stat.exists
+    - "'gzip compressed data' not in file_check.stdout"
+  tags:
+    - chaindata
+
+- name: Unarchive chaindata
+  become: yes
+  unarchive:
+    src: "{{ kaia_conf.DATA_DIR }}/chaindata.tar.gz"
+    dest: "{{ kaia_conf.DATA_DIR }}"
+    remote_src: yes
   when: not check_chaindata_compress_file.stat.exists
   tags:
     - chaindata

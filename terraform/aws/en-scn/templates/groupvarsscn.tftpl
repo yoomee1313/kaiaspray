@@ -1,0 +1,12 @@
+kaia_node_type: ${kaia_node_type}
+
+## parant chain id of service chain
+# kairos: 1001
+# mainnet: 8217
+kaia_service_parent_chain_id: ${kaia_service_parent_chain_id}
+kaia_service_network_id: ${kaia_service_network_id}
+kaia_service_chain_id: ${kaia_service_chain_id}
+kaia_conf_override:
+%{ for key, value in kaia_conf_override_scn ~}
+  ${key}: ${value}
+%{ endfor ~} 

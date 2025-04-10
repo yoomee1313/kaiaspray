@@ -1,0 +1,11 @@
+[Unit]
+Description={{ kaia_daemon_name }} Service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/etc/init.d/{{ kaia_daemon_name }} start
+ExecStop=/etc/init.d/{{ kaia_daemon_name }} stop
+
+[Install]
+WantedBy=multi-user.target 
