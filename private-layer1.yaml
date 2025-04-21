@@ -8,29 +8,23 @@
   tags:
   - localhost
 
-- hosts: cn
+- hosts: cn,pn,en
   gather_facts: True
-  vars:
-    kaia_node_type: cn
-  roles:
-  - { role: kaiaspray-defaults }
-  - { role: node-init }
-
-- hosts: pn
-  gather_facts: True
-  vars:
-    kaia_node_type: pn
-  roles:
-  - { role: kaiaspray-defaults }
-  - { role: node-init }
-
-- hosts: en
-  gather_facts: True
-  vars:
-    kaia_node_type: en
-    kaia_conf_override:
-      RPC_ENABLE: 1
-      RPC_API: kaia,admin,personal,eth,web3,net
+  strategy: free
+  pre_tasks:
+    - name: Set kaia_node_type variable
+      set_fact:
+        kaia_node_type: >-
+          {{ ('cn' if 'cn' in group_names
+              else 'pn' if 'pn' in group_names
+              else 'en' if 'en' in group_names
+              else 'unknown') | trim }}
+    - name: Set configuration override for en node
+      set_fact:
+        kaia_conf_override:
+          RPC_ENABLE: 1
+          RPC_API: kaia,admin,personal,eth,web3,net
+      when: "'en' in group_names"
   roles:
   - { role: kaiaspray-defaults }
   - { role: node-init }
