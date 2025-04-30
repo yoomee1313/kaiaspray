@@ -23,7 +23,7 @@
       set_fact:
         kaia_conf_override:
           RPC_ENABLE: 1
-          RPC_API: kaia,admin,personal,eth,web3,net
+          RPC_API: kaia,admin,personal,eth,web3,net,governance,istanbul
       when: "'en' in group_names"
   roles:
   - { role: kaiaspray-defaults }
