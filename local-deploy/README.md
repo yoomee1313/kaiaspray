@@ -36,10 +36,10 @@ $ ./1.prepare.sh
 $ ./2.start.sh
 ```
 
-It deployes 1 KCN network by default. 
+It deploys 1 KCN network by default. 
 
 
-### Chainging parameters
+### Changing parameters
 You can change parameters in `0.variables.sh`.
 
 | Parameter | Description |
@@ -67,7 +67,7 @@ $ ./4.logs.sh
 ```
 
 ## Stopping the Network
-To stop the network to reduce resource utilzation of your machine, execute the following command:
+To stop the network to reduce resource utilization of your machine, execute the following command:
 
 ```bash
 $ ./5.stop.sh
