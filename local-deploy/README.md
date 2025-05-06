@@ -1,90 +1,109 @@
-# Local Deployment Tool for Kaia
+# Local-deploy
 
-<!-- vim-markdown-toc GFM -->
+This tool is especially designed for development of kaia network. That's why this tool requires the kaia source code which has been compiled. Otherwise(monitoring tool), it will be deployed through docker. 
 
-* [Deploying the local Network](#deploying-the-local-network)
-	* [Prerequisites](#prerequisites)
-	* [Starting the Kaia Network](#starting-the-kaia-network)
-		* [Chainging parameters](#chainging-parameters)
-	* [Checking out the Status of the Network](#checking-out-the-status-of-the-network)
-	* [Getting logs](#getting-logs)
-	* [Stopping the Network](#stopping-the-network)
-	* [Resuming the Network](#resuming-the-network)
-	* [Terminate the Network](#terminate-the-network)
+It deploys the private network. Given an option, you can also deploy the monitoring tool.
 
-<!-- vim-markdown-toc -->
+## Prerequisite
+If you opt to deploy the monitoring tool, you should install the docker at your local computer.
+* docker
+* docker-compose
 
-# Deploying the local Network
+Otherwise, kaia repository should be downloaded at the designated paths.
 
-## Prerequisites
-Following packages are required.
+## Get started
 
-1. [Docker](https://docs.docker.com/get-docker/)
-1. [Docker-compose](https://docs.docker.com/compose/install/)
-
-```bash
-Note: 
-If the Operation System is Windows, please run the below commands from gitbash.
+### Download the kaia repository at the designated paths
+```
 ```
 
-## Starting the Kaia Network
-Execute the following scripts:
-
-```bash
-$ cd local-deploy
-$ ./1.prepare.sh
-$ ./2.start.sh
+### Configuration
+The configuration file is located at `local-deploy/properties.sh`. If not exists, copy from sample_properties.sh.
+```shell
+cp sample_properties.sh properties.sh
 ```
 
-It deployes 1 KCN network by default. 
-
-
-### Chainging parameters
-You can change parameters in `0.variables.sh`.
-
-| Parameter | Description |
-|---|---|
-|CHAIN_ID| The chain ID of the deployed chain. (Default:203) |
-|NETWORK_ID| The network ID of the deployed chain. It would be better to set this value to the same value of CHAIN_ID for simplicity. (Default:203) |
-|NUM_CNS| Number of CNs of the network. (Default:1) |
-|DOCKER_IMAGE| The Docker image to use for the Kaia node. (Default:kaiachain/kaia:latest) |
-|PRIVATE_KEY| The private key of the genesis account having all KAIA. If not set, it is auto-generated. |
-|ADDRESS| The address of the genesis account. This address must be matched to PRIVATE_KEY. |
-
-## Checking out the Status of the Network
-To check out the local Kaia network is working well, first check the status of the docker containers. To do that, execute the following command:
-
-```bash
-$ ./3.status.sh
+#### Setup Directories
+It's mandatory field to set.
+```
+KAIACODE=$HOME/workdir/kaia
+HOMEDIR=$HOME/workdir/kaiaspray/local-deploy
 ```
 
-## Getting logs
-After executing `2.start.sh`, it prints logs for the kaia network.
-If you want to print out the logs in another shell, execute the following command:
-
-```bash
-$ ./4.logs.sh
+#### setup some options
+You can setup custom network_id and number of nodes. If you need, you can increase the number of test accounts as well.
+```
+NETWORK_ID=949494 # put random NETWORK_ID
+NUMOFCN=1
+NUMOFPN=1
+NUMOFEN=1
+NUMOFTESTACCSPERNODE=1
 ```
 
-## Stopping the Network
-To stop the network to reduce resource utilzation of your machine, execute the following command:
-
-```bash
-$ ./5.stop.sh
+#### remix option
+Default value is true. If you don't want to use remix, you can set it to false.
+```
+REMIX=true # if this is true, set the cors field of the EN to use remix. If EN not available, CN will be used for remix.
 ```
 
-## Resuming the Network
-To resume the stopped network, execute the following command:
-
-```bash
-$ ./6.resume.sh
+#### homi - nodekey dir options
+Default value is false. It means the homi will generate new keys. If you're already using existing nodekeys, locate the nodekeys under nodekey
+```
+HOMI_CNKEYS=false
+HOMI_PNKEYS=false
+HOMI_ENKEYS=false
 ```
 
-## Terminate the Network
-To terminate all the resources in your machine, execute the following command:
-
-```bash
-$ ./7.terminate.sh
+### Setup & run & stop Kaia nodes
+To setup kaia directories, run the next script.
+```shell
+./0_kaia_setup.sh
+```
+To copy kaia binaries, run the `./1_copy_binary.sh` script like below.
+```shell
+./1_copy_binary.sh # it copies the binaries to all nodes
+./1_copy_binary.sh cn 1 # it copies the binary to the first cn node
+./1_copy_binary.sh en 3 # it copies the binary to the third en node
+```
+To delete and initialize the data directory, run the `2_initialize_nodes.sh` script like below.
+```shell
+./2_initialize_nodes.sh # it deletes and initializes the all nodes
+./2_initialize_nodes.sh cn 1 # it deletes and initializes the first cn node
+./2_initialize_nodes.sh en 3 # it deletes and initializes the third en node
+````
+To start the kaia nodes, run the `3_ccstart.sh` script like below.
+```shell
+./3_ccstart.sh # it starts all nodes
+./3_ccstart.sh cn 1 # it starts the first cn node
+./3_ccstart.sh en 3 # it starts the third en node
 ```
 
-**Note** All the transactions and blocks you made will be lost.
+To attach the kaia node, run the `5_ccattach.sh` script like below.
+```shell
+./5_ccattach.sh cn 1 # it attaches the first cn node
+./5_ccattach.sh en 3 # it attaches the third en node
+```
+
+To tail the log, run the `6_logs.sh` script like below.
+```shell
+./6_logs.sh cn 1 # it tails the log of the first cn node
+./6_logs.sh en 3 # it tails the log of the third en node
+```
+
+To stop the kaia nodes, run the `4_ccstop.sh` script like below.
+```shell
+./4_ccstop.sh # it stops all nodes
+./4_ccstop.sh cn 1 # it stops the first cn node
+./4_ccstop.sh en 3 # it stops the third en node 
+```
+
+### Start & stop monitoring tool
+To start the monitoring tool, run the next script.
+```shell
+./7_monitoring.sh start
+```
+
+To stop the monitoring tool, run the next script.
+```shell
+./7_monitoring.sh stop
+```
