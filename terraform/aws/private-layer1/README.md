@@ -3,7 +3,7 @@
 ### 1. Deploy AWS resources
 > :warning: Before running the following commands, please get AWS credentials.
 
-Execute command belows to deploy resources via Terraform.
+Execute command below to deploy resources via Terraform.
 ```bash
 $ git clone https://github.com/kaiachain/kaiaspray.git
 $ cd kaiaspray
