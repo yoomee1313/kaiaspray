@@ -1,109 +1,135 @@
-# Local-deploy
+# Local Deployment Guide
 
-This tool is especially designed for development of kaia network. That's why this tool requires the kaia source code which has been compiled. Otherwise(monitoring tool), it will be deployed through docker. 
+This guide explains how to deploy a local Kaia network.
 
-It deploys the private network. Given an option, you can also deploy the monitoring tool.
+## Prerequisites
 
-## Prerequisite
-If you opt to deploy the monitoring tool, you should install the docker at your local computer.
-* docker
-* docker-compose
+- Docker and Docker Compose installed
+- Git installed
 
-Otherwise, kaia repository should be downloaded at the designated paths.
+## Get Started
 
-## Get started
+1. Download the kaia repository at the designated paths:
+   ```bash
+   # Create a directory for kaia
+   mkdir -p ~/workdir
+   cd ~/workdir
+   
+   # Clone the kaia repository
+   git clone https://github.com/kaiachain/kaia.git
+   cd kaia
 
-### Download the kaia repository at the designated paths
-```
-```
+   # Build the binaries
+   make
+   ```
 
-### Configuration
-The configuration file is located at `local-deploy/properties.sh`. If not exists, copy from sample_properties.sh.
-```shell
-cp sample_properties.sh properties.sh
-```
+2. Navigate to the local-deploy directory:
+   ```bash
+   cd local-deploy
+   ```
 
-#### Setup Directories
-It's mandatory field to set.
-```
-KAIACODE=$HOME/workdir/kaia
-HOMEDIR=$HOME/workdir/kaiaspray/local-deploy
-```
+3. Configure properties.sh
 
-#### setup some options
-You can setup custom network_id and number of nodes. If you need, you can increase the number of test accounts as well.
-```
-NETWORK_ID=949494 # put random NETWORK_ID
-NUMOFCN=1
-NUMOFPN=1
-NUMOFEN=1
-NUMOFTESTACCSPERNODE=1
-```
+   Copy the properties.sh file from copy_properties.sh
+   ```bash
+   cp sample_properties.sh properties.sh
+   ```
+   Setup Directories In Properties.sh - It's mandatory field to set.
+   ```
+   KAIACODE=$HOME/workdir/kaia
+   HOMEDIR=$HOME/workdir/kaiaspray/local-deploy
+   ```
+   Setup Network_Id, Number of Nodes, and Number of TestAccounts
+   ```
+   NETWORK_ID=949494 # put random NETWORK_ID
+   NUMOFCN=1
+   NUMOFPN=1
+   NUMOFEN=1
+   NUMOFTESTACCSPERNODE=1
+   ```
+   Remix option - Default value is true.
+   ```
+   REMIX=true # if this is true, set the cors field of the EN to use remix. If EN not available, CN will be used for remix.
+   ```
 
-#### remix option
-Default value is true. If you don't want to use remix, you can set it to false.
-```
-REMIX=true # if this is true, set the cors field of the EN to use remix. If EN not available, CN will be used for remix.
-```
+   Homi options
+   ```
+   # nodekey directory options - Default value is false. 
+   # - It means the homi will generate new keys. 
+   # - If you're already using existing nodekeys, 
+   #   locate the nodekeys under nodekey
+   HOMI_CNKEYS=false
+   HOMI_PNKEYS=false
+   HOMI_ENKEYS=false
+   ```
 
-#### homi - nodekey dir options
-Default value is false. It means the homi will generate new keys. If you're already using existing nodekeys, locate the nodekeys under nodekey
-```
-HOMI_CNKEYS=false
-HOMI_PNKEYS=false
-HOMI_ENKEYS=false
-```
+4. Setup and Interact with Kaia nodes
+   
+   Next scripts are used to setup and interact with kaia nodes
+   - `0_kaia_setup.sh`: Generate homi-output and setup kaia node directories
+   - `1_copy_binary.sh`: Copy the built binaries from Kaia source code
+   - `2_initialize_nodes.sh`: Delete and initialize the kaia nodes
+   - `3_ccstart.sh`: Start the kaia nodes
+   - `4_ccstop.sh`: Stop the kaia nodes
+   - `5_attach.sh`: Attach the kaia node
+   - `6_logs.sh`: Tail the log file of the kaia node
 
-### Setup & run & stop Kaia nodes
-To setup kaia directories, run the next script.
-```shell
+   Run next scripts
+   ```bash
+   ./0_kaia_setup.sh
+   ./1_copy_binary.sh
+   ./2_initialize_nodes.sh
+   ./3_ccstart.sh
+   ```
+
+   Try attach the en node
+   ```bash
+   ./5_attach.sh en 1
+   ```
+
+   Try tail the log of the cn node
+   ```bash
+   ./6_logs.sh cn 1
+   ```
+
+5. Interact with Monitoring tools
+
+   The deployment includes monitoring tools:
+   - Prometheus: Available at http://localhost:9090
+   - Grafana: Available at http://localhost:3000 (default credentials: admin/admin)
+
+   To start the monitoring tool, run the next script.
+   ```shell
+   ./7_monitoring.sh start
+   ```
+
+   To stop the monitoring tool, run the next script.
+   ```shell
+   ./7_monitoring.sh stop
+   ```
+
+## Usages
+```bash
 ./0_kaia_setup.sh
-```
-To copy kaia binaries, run the `./1_copy_binary.sh` script like below.
-```shell
-./1_copy_binary.sh # it copies the binaries to all nodes
-./1_copy_binary.sh cn 1 # it copies the binary to the first cn node
-./1_copy_binary.sh en 3 # it copies the binary to the third en node
-```
-To delete and initialize the data directory, run the `2_initialize_nodes.sh` script like below.
-```shell
-./2_initialize_nodes.sh # it deletes and initializes the all nodes
-./2_initialize_nodes.sh cn 1 # it deletes and initializes the first cn node
-./2_initialize_nodes.sh en 3 # it deletes and initializes the third en node
-````
-To start the kaia nodes, run the `3_ccstart.sh` script like below.
-```shell
-./3_ccstart.sh # it starts all nodes
-./3_ccstart.sh cn 1 # it starts the first cn node
-./3_ccstart.sh en 3 # it starts the third en node
-```
-
-To attach the kaia node, run the `5_ccattach.sh` script like below.
-```shell
-./5_ccattach.sh cn 1 # it attaches the first cn node
-./5_ccattach.sh en 3 # it attaches the third en node
-```
-
-To tail the log, run the `6_logs.sh` script like below.
-```shell
-./6_logs.sh cn 1 # it tails the log of the first cn node
-./6_logs.sh en 3 # it tails the log of the third en node
-```
-
-To stop the kaia nodes, run the `4_ccstop.sh` script like below.
-```shell
-./4_ccstop.sh # it stops all nodes
-./4_ccstop.sh cn 1 # it stops the first cn node
-./4_ccstop.sh en 3 # it stops the third en node 
-```
-
-### Start & stop monitoring tool
-To start the monitoring tool, run the next script.
-```shell
+./1_copy_binary.sh # copy the binaries to all nodes
+./1_copy_binary.sh cn 1 # copy the binary to the first cn node
+./1_copy_binary.sh en 3 # copy the binary to the third en node
+./2_initialize_nodes.sh # delete and initialize the all nodes
+./2_initialize_nodes.sh cn 1 # delete and initialize the first cn
+./2_initialize_nodes.sh en 3 # delete and initialize the third en
+./3_ccstart.sh # start all nodes
+./3_ccstart.sh cn 1 # start the first cn
+./3_ccstart.sh en 3 # start the third en
+./4_ccstop.sh # stop all nodes
+./4_ccstop.sh cn 1 # stop the first cn
+./4_ccstop.sh en 3 # stop the third en 
+./5_ccattach.sh cn 1 # attach the first cn
+./5_ccattach.sh en 3 # attach the third en
+./6_logs.sh cn 1 # tail the log of the first cn
+./6_logs.sh en 3 # tail the log of the third en
 ./7_monitoring.sh start
-```
-
-To stop the monitoring tool, run the next script.
-```shell
 ./7_monitoring.sh stop
 ```
+
+## TroubleShooting
+TBD
