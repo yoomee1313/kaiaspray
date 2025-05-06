@@ -13,9 +13,12 @@ mkdir -p monitoring/grafana/provisioning/dashboards
 
 # Function to setup Grafana dashboards
 setup_grafana_dashboards() {
+  # Get the absolute path of the script directory
+  SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  
   # Copy Grafana configuration files from roles/monitor-init/files/grafana/dashboards
-  cp roles/monitor-init/files/grafana/dashboards/*.json monitoring/grafana/provisioning/dashboards/
-  cp roles/monitor-init/files/grafana/dashboards/kaia-dashboard.yml monitoring/grafana/provisioning/dashboards/
+  cp "${SCRIPT_DIR}/../roles/monitor-init/files/grafana/dashboards/"*.json monitoring/grafana/provisioning/dashboards/
+  cp "${SCRIPT_DIR}/../roles/monitor-init/files/grafana/dashboards/kaia-dashboard.yml" monitoring/grafana/provisioning/dashboards/
 
   # Generate grafana-dashboard config file
   printf "%s\n" "apiVersion: 1" \
@@ -31,11 +34,11 @@ generate_prometheus_config() {
   source ./properties.sh
   
   printf "%s\n" "global:" \
-                "  evaluation_interval: 15s" \
-                "  scrape_interval: 15s" \
+                "  evaluation_interval: 5s" \
+                "  scrape_interval: 5s" \
                 "" \
                 "scrape_configs:" \
-                "- job_name: klaytn" \
+                "- job_name: 'kaia'" \
                 "  static_configs:" > monitoring/prometheus/prometheus.yml
 
   # Add targets for all nodes
@@ -47,6 +50,7 @@ generate_prometheus_config() {
     printf "    labels:\n" >> monitoring/prometheus/prometheus.yml
     printf "      node_type: \"cn\"\n" >> monitoring/prometheus/prometheus.yml
     printf "      name: \"cn%d\"\n" $((i + 1)) >> monitoring/prometheus/prometheus.yml
+    printf "      instance: \"cn%d\"\n" $((i + 1)) >> monitoring/prometheus/prometheus.yml
   done
 
   # PN nodes
@@ -57,6 +61,7 @@ generate_prometheus_config() {
     printf "    labels:\n" >> monitoring/prometheus/prometheus.yml
     printf "      node_type: \"pn\"\n" >> monitoring/prometheus/prometheus.yml
     printf "      name: \"pn%d\"\n" $((i + 1)) >> monitoring/prometheus/prometheus.yml
+    printf "      instance: \"pn%d\"\n" $((i + 1)) >> monitoring/prometheus/prometheus.yml
   done
 
   # EN nodes
@@ -67,6 +72,7 @@ generate_prometheus_config() {
     printf "    labels:\n" >> monitoring/prometheus/prometheus.yml
     printf "      node_type: \"en\"\n" >> monitoring/prometheus/prometheus.yml
     printf "      name: \"en%d\"\n" $((i + 1)) >> monitoring/prometheus/prometheus.yml
+    printf "      instance: \"en%d\"\n" $((i + 1)) >> monitoring/prometheus/prometheus.yml
   done
 
   echo "Generated Prometheus config with ${NUMOFCN} CN, ${NUMOFPN} PN, and ${NUMOFEN} EN nodes"
