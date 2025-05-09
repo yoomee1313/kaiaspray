@@ -4,7 +4,6 @@ cache
 terraform.tfstate*
 .terraform*
 *.pem
-*.sh
 .idea
 .DS_Store
 inventory/*/inventory.ini
@@ -16,3 +15,5 @@ local-deploy/Klaytn.json*
 local-deploy/prometheus.yml
 local-deploy/datasources.yml
 local-deploy/dashboard.yml
+analytics-tool/output
+analytics-tool/analysis_*
