@@ -15,3 +15,5 @@ local-deploy/properties.sh
 local-deploy/cn*
 local-deploy/pn*
 local-deploy/en*
+analytics-tool/output
+analytics-tool/analysis_*
