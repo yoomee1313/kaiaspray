@@ -1,5 +1,5 @@
 homi_bin: "{{ bin_dir }}/homi"
 homi_default_options: ""
-homi_test_account_num: 2
+homi_test_account_num: 16
 
 force_create_genesis: False
