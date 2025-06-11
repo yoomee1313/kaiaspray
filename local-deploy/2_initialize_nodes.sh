@@ -1,3 +1,4 @@
+#!/bin/bash
 if [ $# -eq 2 ]; then
   echo ${1} ${2}
   ./2-1.deletedata.sh ${1} ${2}

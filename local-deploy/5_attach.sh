@@ -1,3 +1,4 @@
+#!/bin/bash
 binary=${1}${2}/bin/k${1}
 url=${1}${2}/data/klay.ipc
 if [ "$3" = "ws" ]; then

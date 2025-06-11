@@ -1,3 +1,4 @@
+#!/bin/bash
 source ./properties.sh
 cd $HOMEDIR
 
