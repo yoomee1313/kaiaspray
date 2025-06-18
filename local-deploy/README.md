@@ -129,6 +129,9 @@ This guide explains how to deploy a local Kaia network.
 ./6_logs.sh en 3 # tail the log of the third en
 ./7_monitoring.sh start
 ./7_monitoring.sh stop
+./8_explorer.sh start en 1 # fetch data from en1
+./8_explorer.sh stop
+./8_explorer.sh delete # delete explorer db to force re-indexing
 ```
 
 ## TroubleShooting
