@@ -33,10 +33,12 @@ services:
         ETHEREUM_JSONRPC_HTTP_URL: ${RPC_URL:-http://host.docker.internal:8551/}
         ETHEREUM_JSONRPC_TRACE_URL: ${RPC_URL:-http://host.docker.internal:8551/}
         ETHEREUM_JSONRPC_WS_URL: ${WS_URL:-ws://host.docker.internal:8552/}
+        CHAIN_ID: ${CHAIN_ID:-31337}
         INDEXER_DISABLE_PENDING_TRANSACTIONS_FETCHER: 'true'
         INDEXER_DISABLE_EMPTY_BLOCKS_SANITIZER: 'true'
         INDEXER_INTERNAL_TRANSACTIONS_TRACER_TYPE: 'opcode'
-        CHAIN_ID: ${CHAIN_ID:-31337}
+        INDEXER_CATCHUP_BLOCK_INTERVAL: '1s'
+        LOG_LEVEL: 'warn'
     volumes:
       - ./config/runtime:/app/config/runtime
 

@@ -121,5 +121,6 @@ Code.require_file("#{variant}.exs", "apps/indexer/config/prod")
 ### Added for kaiaspray
 #######################
 
-config :logger_json, :backend, level: :warn
-
+log_level_string = System.get_env("LOG_LEVEL", "info")
+log_level = String.to_atom(log_level_string)
+config :logger_json, :backend, level: log_level
