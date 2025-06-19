@@ -15,10 +15,5 @@ local-deploy/properties.sh
 local-deploy/cn*
 local-deploy/pn*
 local-deploy/en*
-local-deploy/explorer/services/blockscout-db-data
-local-deploy/explorer/services/dets
-local-deploy/explorer/services/logs
-local-deploy/explorer/services/redis-data
-local-deploy/explorer/services/stats-db-data
 analytics-tool/output
 analytics-tool/analysis_*

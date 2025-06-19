@@ -14,10 +14,6 @@ docker_compose() {
 	fi
 }
 
-delete_explorer_data() {
-    rm -rf explorer/services/blockscout-db-data explorer/services/dets explorer/services/logs explorer/services/redis-data explorer/services/stats-db-data
-}
-
 start_explorer() {
     set -e
     RPC_PORT=$(sed -n 's/^RPC_PORT=\([0-9]*\)$/\1/p' ${1}${2}/conf/k${1}d.conf)
@@ -31,14 +27,7 @@ start_explorer() {
     set +e
 }
 
-# --gcmode archive --state.block-interval 1
-
 case "$1" in
-    delete)
-        echo "Deleting explorer database..."
-        docker_compose down
-        delete_explorer_data
-        ;;
     start)
         shift
         start_explorer "$@"
@@ -47,7 +36,9 @@ case "$1" in
         docker_compose stop
         ;;
     *)
-        echo "Usage: $0 {start|stop|delete}"
+        echo "Usage: $0 {start|stop}"
+        echo "  $0 start en 1"
+        echo "  $0 stop"
         exit 1
         ;;
 esac
