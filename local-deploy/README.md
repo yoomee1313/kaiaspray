@@ -122,13 +122,16 @@ This guide explains how to deploy a local Kaia network.
 ./3_ccstart.sh en 3 # start the third en
 ./4_ccstop.sh # stop all nodes
 ./4_ccstop.sh cn 1 # stop the first cn
-./4_ccstop.sh en 3 # stop the third en 
+./4_ccstop.sh en 3 # stop the third en
 ./5_ccattach.sh cn 1 # attach the first cn
 ./5_ccattach.sh en 3 # attach the third en
 ./6_logs.sh cn 1 # tail the log of the first cn
 ./6_logs.sh en 3 # tail the log of the third en
 ./7_monitoring.sh start
 ./7_monitoring.sh stop
+./8_explorer.sh start en 1 1.2.3.4 # fetch data from en1, serve at http://1.2.3.4
+./8_explorer.sh start en 1 # fetch data from en1
+./8_explorer.sh stop
 ```
 
 ## TroubleShooting
@@ -152,4 +155,3 @@ $ cat cn1/data/static-nodes.json
     "kni://20b871f3ced029e14472ec4ebc3c0448164942b123aa6af91a3386c1c403e0ebd3b4a5752a2b6c49e574619e6aa0549eb9ccd036b9bbc507e1f7f9712a236092@0.0.0.0:32329?discport=0\u0026ntype=cn"
 ]
 ```
-

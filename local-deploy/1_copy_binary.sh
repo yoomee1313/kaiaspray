@@ -1,3 +1,4 @@
+#!/bin/bash
 source ./properties.sh
 
 if [ $# -eq 2 ]; then
