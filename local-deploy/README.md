@@ -132,6 +132,8 @@ This guide explains how to deploy a local Kaia network.
 ./8_explorer.sh start en 1 1.2.3.4 # fetch data from en1, serve at http://1.2.3.4
 ./8_explorer.sh start en 1 # fetch data from en1
 ./8_explorer.sh stop
+./9_rolling_update.sh cn 1 # update one node
+./9_rolling_update.sh # update all nodes one by one
 ```
 
 ## TroubleShooting
