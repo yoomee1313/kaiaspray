@@ -14,8 +14,8 @@ modifyNNData()
   for ((num = 1; num <= NUM_OF_NODE; num++))
   do
     PORT=$(( 32323 + (PORT_BASE+num-1)*2 ))
-    RPC_PORT=$(( 8551 + (PORT_BASE+num-1)*2 ))
-    WS_PORT=$(( 8551 + (PORT_BASE+num-1)*2 +1 ))
+    RPC_PORT=$(( 8551 + PORT_BASE+num - 1 ))
+    WS_PORT=$(( 8651 + PORT_BASE+num - 1 ))
     PROMETHEUS_PORT=$(( 61001 + PORT_BASE + num - 1))
 
     echo $NODE_TYPE$num ": " $PORT $RPC_PORT $WS_PORT $PROMETHEUS_PORT

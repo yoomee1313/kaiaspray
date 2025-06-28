@@ -11,6 +11,14 @@ mkdir -p monitoring/prometheus
 mkdir -p monitoring/grafana/provisioning/datasources
 mkdir -p monitoring/grafana/provisioning/dashboards
 
+docker_compose() {
+    if docker compose version >/dev/null 2>&1; then
+        docker compose -f ./docker-compose.yml "$@"
+    else
+        docker-compose -f ./docker-compose.yml "$@"
+    fi
+}
+
 # Function to setup Grafana dashboards
 setup_grafana_dashboards() {
   # Get the absolute path of the script directory
@@ -95,13 +103,13 @@ case "$1" in
         generate_prometheus_config
         generate_grafana_config
         setup_grafana_dashboards
-        docker-compose up -d
+        docker_compose up -d
         echo "Prometheus is available at http://localhost:9090"
         echo "Grafana is available at http://localhost:3000 (admin/admin)"
         ;;
     stop)
         echo "Stopping monitoring tools..."
-        docker-compose down
+        docker_compose down
         echo "Monitoring tools stopped"
         ;;
     url)
