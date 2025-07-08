@@ -27,7 +27,9 @@
   copy:
     src: "{{ homi_output_dir }}/{{ kaia_node_type }}/scripts/static-nodes{{ node_index }}.json"
     dest: "{{ kaia_conf.DATA_DIR }}/static-nodes.json"
-  when: kaia_network is not defined or kaia_network == ""
+  when: kaia_network is none
+
+
 
 - name: "Initialization - Copy main-gridge.json"
   become: yes
@@ -43,7 +45,7 @@
   copy:
     src: "{{ homi_output_dir }}/{{ kaia_node_type }}/keys/nodekey{{ node_index }}"
     dest: "{{ kaia_conf.DATA_DIR }}/nodekey"
-  when: kaia_network is not defined or kaia_network == ""
+  when: kaia_network is none
 
 - name: "Initialization - Check genesis initialized"
   become: yes
@@ -59,7 +61,7 @@
   when:
   - check_kaia_data_dir.stat.exists == False
   - is_service_chain == False
-  - kaia_network is not defined or kaia_network == ""
+  - kaia_network is none
 
 - name: "Initialization - Copy Genesis File"
   become: yes
@@ -69,13 +71,13 @@
   when:
   - check_kaia_data_dir.stat.exists == False
   - is_service_chain
-  - kaia_network is not defined or kaia_network == ""
+  - kaia_network is none
 
 - name: "Initialization - Genensis"
   become: yes
   shell:
     cmd: "k{{ kaia_node_type }} init --datadir {{ kaia_conf.DATA_DIR }} /etc/{{ kaia_daemon_name }}/genesis.json"
   when:
-  - kaia_network is not defined or kaia_network == ""
+  - kaia_network is none
   - check_kaia_data_dir.stat.exists == False
 
