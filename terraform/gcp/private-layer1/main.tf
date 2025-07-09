@@ -13,6 +13,9 @@ module "layer1" {
 
   boot_image_id  = data.google_compute_image.this.self_link
   ssh_client_ips = var.ssh_client_ips
+  user_name      = var.user_name
+  ssh_private_key_path = module.keypair.ssh_private_key_path
+  ssh_key_file_created = module.keypair.ssh_key_file_created
 
   cn_options      = var.cn_options
   pn_options      = var.pn_options
@@ -21,7 +24,10 @@ module "layer1" {
 
   metadata = merge(
     var.metadata,
-    local.default_metadata,
-    { ssh-keys = format("%s:%s %s", var.user_name, trimspace(module.keypair.ssh_public_key), var.user_name) }
+    {
+      Name      = local.name
+      ManagedBy = "terraform"
+      ssh-keys  = format("%s:%s %s", var.user_name, trimspace(module.keypair.ssh_public_key), var.user_name)
+    }
   )
 }

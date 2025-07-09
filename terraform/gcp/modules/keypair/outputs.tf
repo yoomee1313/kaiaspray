@@ -7,5 +7,9 @@ output "ssh_public_key" {
 }
 
 output "ssh_private_key_path" {
-  value = local.private_key_path
+  value = var.create_gcp_key_pair ? var.ssh_private_key_path : var.ssh_existing_private_key_path
+}
+
+output "ssh_key_file_created" {
+  value = var.create_gcp_key_pair ? local_sensitive_file.this[0].id : "existing_key"
 }
