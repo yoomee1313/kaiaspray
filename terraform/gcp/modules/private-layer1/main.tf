@@ -145,8 +145,11 @@ resource "null_resource" "cn_disk_mount" {
     if options.compute_disk_size != null
   }
 
+  depends_on = [var.ssh_key_file_created]
+
   triggers = {
     instance_id = module.cn[each.key].instance_link
+    ssh_key_file = var.ssh_key_file_created
   }
 
   provisioner "file" {
@@ -183,8 +186,11 @@ resource "null_resource" "pn_disk_mount" {
     if options.compute_disk_size != null
   }
 
+  depends_on = [var.ssh_key_file_created]
+
   triggers = {
     instance_id = module.pn[each.key].instance_link
+    ssh_key_file = var.ssh_key_file_created
   }
 
   provisioner "file" {
@@ -221,8 +227,11 @@ resource "null_resource" "en_disk_mount" {
     if options.compute_disk_size != null
   }
 
+  depends_on = [var.ssh_key_file_created]
+
   triggers = {
     instance_id = module.en[each.key].instance_link
+    ssh_key_file = var.ssh_key_file_created
   }
 
   provisioner "file" {
@@ -256,8 +265,11 @@ resource "null_resource" "en_disk_mount" {
 resource "null_resource" "monitor_disk_mount" {
   count = try(local.monitor_options.compute_disk_size, null) != null ? 1 : 0
 
+  depends_on = [var.ssh_key_file_created]
+
   triggers = {
     instance_id = module.monitor.instance_link
+    ssh_key_file = var.ssh_key_file_created
   }
 
   provisioner "file" {

@@ -102,3 +102,8 @@ variable "user_name" {
   description = "User name for SSH login to instances"
   default     = "core"
 }
+
+variable "ssh_key_file_created" {
+  type        = string
+  description = "INTERNAL: Do not set this manually. ID of the created SSH key file for dependency management"
+}

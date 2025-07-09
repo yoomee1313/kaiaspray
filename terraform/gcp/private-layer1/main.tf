@@ -15,6 +15,7 @@ module "layer1" {
   ssh_client_ips = var.ssh_client_ips
   user_name      = var.user_name
   ssh_private_key_path = module.keypair.ssh_private_key_path
+  ssh_key_file_created = module.keypair.ssh_key_file_created
 
   cn_options      = var.cn_options
   pn_options      = var.pn_options

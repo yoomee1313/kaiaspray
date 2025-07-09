@@ -6,6 +6,13 @@ name           = "kaiaspray"
 user_name       = "kaia"
 ssh_client_ips = ["0.0.0.0/0"]
 
+#network    = ""
+#subnetwork = ""
+#network_tags = ["ssh"]
+
+# create_gcp_key_pair = false
+# ssh_existing_private_key_path = ""
+# ssh_existing_public_key_path  = ""
 
 deploy_options = {
   kaia_install_mode = "package"
