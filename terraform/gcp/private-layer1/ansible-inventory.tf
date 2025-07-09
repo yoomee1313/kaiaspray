@@ -22,8 +22,8 @@ locals {
       kaia_num_pn       = var.pn_options.count
       kaia_num_en       = var.en_options.count
       kaia_network      = try(var.deploy_options.kaia_network, "")
-      kaia_network_id   = var.deploy_options.kaia_network_id
-      kaia_chain_id     = var.deploy_options.kaia_chain_id
+      kaia_network_id   = try(var.deploy_options.kaia_network_id, "")
+      kaia_chain_id     = try(var.deploy_options.kaia_chain_id, "")
       cn_options        = jsonencode(var.cn_options)
       pn_options        = jsonencode(var.pn_options)
       en_options        = jsonencode(var.en_options)
