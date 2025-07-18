@@ -32,7 +32,7 @@ HOMI_ENKEYS=false
 
 # homi - some useful options
 HOMI_PATCH_ADDRESSBOOK=false # if you set true, the addressbook admin will be the cn1 nodekey.
-HOMI_REGISTRY=false # if you set true, the bls-registry mock will be registered automatically.
+HOMI_REGISTRY_MOCK=false # if you set true, the bls-registry mock will be registered automatically.
 HOMI_NUMOF_INITIAL_CN_NUM=0 # amount NUMOFCN, HOMI_NUMOF_INITIAL_CN_NUM will be addvalidate later.
 HOMI_BAOBAB_TEST=false # if you set true, the homi will be setup for baobab testnet.
 # HOMI_PATCH_ADDRESSBOOK_ADDR=0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
