@@ -56,7 +56,7 @@ AUTO_RESTART_NODE={{ kaia_conf.AUTO_RESTART_NODE | default('1') }}
 AUTO_RESTART_INTERVAL={{ kaia_conf.AUTO_RESTART_INTERVAL | default('0.1') }}
 
 # Raw options e.g) "--txpool.nolocals"
-ADDITIONAL={{ kaia_conf.ADDITIONAL | default('') }}
+ADDITIONAL="{{ kaia_conf.ADDITIONAL | default('') }}"
 
 DATA_DIR={{ kaia_conf.DATA_DIR | default('/var/' + kaia_daemon_name + '/data') }}
 LOG_DIR={{ kaia_conf.LOG_DIR | default('/var/' + kaia_daemon_name + '/logs') }}
