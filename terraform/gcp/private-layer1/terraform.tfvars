@@ -1,33 +1,34 @@
 project    = "kaiaspray"
-project_id = "kaiaspray-123456"
-gcp_region = "asia-northeast3"
+project_id = "klaytn-platform-dev"
+gcp_region = "asia-northeast3" # could be asia-northeast3(japan), asia-northeast1(seoul)
 
-name           = "kaiaspray"
-user_name       = "kaia"
+name           = "yumiel-kaiaspray-test"
+user_name      = "kaia"  # User name for SSH login
 ssh_client_ips = ["0.0.0.0/0"]
 
-#network    = ""
-#subnetwork = ""
-#network_tags = ["ssh"]
+network    = "platform-dev-vpc"
+subnetwork = "platform-dev-public-subnet"
+network_tags = ["ssh", "klaytn-metrics", "klaytn-rpc", "load-test", "grafana"]
 
-# create_gcp_key_pair = false
-# ssh_existing_private_key_path = ""
-# ssh_existing_public_key_path  = ""
+create_gcp_key_pair = false
+ssh_existing_private_key_path = "/Users/yumiel/.ssh/core-dev.pem"
+ssh_existing_public_key_path  = "/Users/yumiel/.ssh/core-dev.pub"
 
 deploy_options = {
   kaia_install_mode = "package"
-  kaia_version = "v1.0.3"
+  kaia_version = "v2.0.3"
   kaia_build_docker_base_image = "kaiachain/build_base:latest"
   #kaia_build_remote_git_url = "git@github.com:kaiachain/kaia.git"
   #kaia_build_remote_git_branch = "dev"
   #kaia_network = "kairos"
-  kaia_network_id = 9999
-  kaia_chain_id   = 9999
+  kaia_network_id = 949494
+  kaia_chain_id   = 949494
   # homi_extra_options = ""
+  genesis_path = "/Users/yumiel/workdir/kaiaspray/local-deploy/homi-output/scripts/genesis.json"
 }
 
 cn_options = {
-  count          = 1
+  count          = 0
   machine_type   = "n2-standard-2"
   boot_disk_size = 30
   # compute_disk_size = 100 # if you set compute_disk_size, it will be protected if you delete MANUALLY. So, be aware of this, and please run "destroy" command when you want to delete the node.
@@ -41,7 +42,7 @@ pn_options = {
 }
 
 en_options = {
-  count = 2
+  count = 1
   machine_type   = "n2-standard-2"
   boot_disk_size = 30
   # compute_disk_size = 100
