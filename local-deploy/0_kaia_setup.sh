@@ -50,6 +50,8 @@ modifyNNData()
       echo "" >> conf/pwd.txt
       # set REWARDBASE and unlock at kcnd.conf
       sed -i.bak "s/REWARDBASE=.*/REWARDBASE=\""`cat ../homi-output/keys/reward$num`"\"/g" $CONF_DIR
+      # set all APIs including auction to RPC_API
+      sed -i.bak "s/RPC_API=.*/RPC_API=\"admin,debug,kaia,miner,net,personal,rpc,txpool,web3,eth,istanbul,governance,auction\"/g" $CONF_DIR
       # set proper port number at static-nodes.json
       sed -i.bak $((num+1))"s/:"$((32323+PORT_BASE+num-1))"/:"$PORT"/g" ../homi-output/scripts/static-nodes.json
     elif [ $NODE_TYPE = "pn" ]; then
