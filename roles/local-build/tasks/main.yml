@@ -1,92 +1,90 @@
 ---
+- name: Set build variables
+  set_fact:
+    git_url: "{{ deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url) }}"
+    git_branch: "{{ deploy_options.kaia_build_remote_git_branch | default(kaia_build_remote_git_branch) }}"
+
+- name: Calculate total builds
+  set_fact:
+    total_builds: "{{ [git_url | length if git_url is iterable and git_url is not string else 1, git_branch | length if git_branch is iterable and git_branch is not string else 1] | max }}"
+
 - name: Build - Check compiled binary
   ansible.builtin.stat:
-    path: "{{ kaia_build_check_file_path }}"
-  register: kaia_build_check_file_stat
-
-- name: Build - Check skipping compile
-  ansible.builtin.set_fact:
-    kaia_build_required: True
-  when:
-    - kaia_build_check_file_stat.stat.exists == False or 
-      kaia_build_skip_if_exists == False
+    path: "{{ kaia_build_check_file_path }}-{{ item }}"
+  register: kaia_build_check_file_stats
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Clean the old directory
   ansible.builtin.file:
     state: absent
-    path: "{{ kaia_build_dir }}"
-  when:
-    - kaia_build_required
+    path: "{{ kaia_build_dir }}-{{ item }}"
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Git checkout
   ansible.builtin.git:
-    repo: "{{ kaia_build_remote_git_url }}"
-    dest: "{{ kaia_build_dir }}"
-    version: "{{ kaia_build_remote_git_branch }}"
-  when:
-    - kaia_build_required
+    repo: "{{ git_url[item] if git_url is iterable and git_url is not string else git_url }}"
+    dest: "{{ kaia_build_dir }}-{{ item }}"
+    version: "{{ git_branch[item] if git_branch is iterable and git_branch is not string else git_branch }}"
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Compile kaia binary
   ansible.builtin.command: |
-    docker build --build-arg KLAYTN_STATIC_LINK=1 --build-arg DOCKER_BASE_IMAGE={{ kaia_build_docker_base_image }} -t {{ kaia_build_docker_builder_image }} --output output .
+    docker build --build-arg KLAYTN_STATIC_LINK=1 --build-arg DOCKER_BASE_IMAGE={{ kaia_build_docker_base_image }} -t {{ kaia_build_docker_builder_image }}-{{ item }} --output output .
   args:
-    chdir: "{{ kaia_build_dir }}"
+    chdir: "{{ kaia_build_dir }}-{{ item }}"
   environment:
     DOCKER_BUILDKIT: 1
-  when:
-    - kaia_build_required
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Compile homi binary locally
   ansible.builtin.command: |
     make homi
   args:
-    chdir: "{{ kaia_build_dir }}"
-  when:
-    - kaia_build_required
+    chdir: "{{ kaia_build_dir }}-{{ item }}"
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"
+
+- name: Build - Create bin directory
+  ansible.builtin.file:
+    path: "{{ bin_dir }}-{{ item }}"
+    state: directory
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Copy homi binary
   ansible.builtin.copy:
-    dest: "{{ bin_dir }}/homi"
-    src: "{{ kaia_build_dir }}/build/bin/homi"
+    dest: "{{ bin_dir }}-{{ item }}/homi"
+    src: "{{ kaia_build_dir }}-{{ item }}/output/klaytn-docker-pkg/bin/homi"
     mode: preserve
-  when:
-    - kaia_build_required
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Copy kaia binary files
   ansible.builtin.copy:
-    dest: "{{ bin_dir }}"
-    src: "{{ kaia_build_dir }}/output/klaytn-docker-pkg/bin/{{ item }}"
+    dest: "{{ bin_dir }}-{{ item[0] }}"
+    src: "{{ kaia_build_dir }}-{{ item[0] }}/output/klaytn-docker-pkg/bin/{{ item[1] }}"
     mode: preserve
-  loop:
-    - kbn
-    - kcn
-    - kpn
-    - ken
-    - kscn
-    - kspn
-    - ksen
-  when:
-    - kaia_build_required
+  when: not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  with_nested:
+    - "{{ range(0, total_builds | int) | list }}"
+    - ['kbn', 'kcn', 'kpn', 'ken', 'kscn', 'kspn', 'ksen']
 
 - name: Build - Copy kaia init.d script files
   ansible.builtin.copy:
-    dest: "{{ bin_dir }}"
-    src: "{{ kaia_build_dir }}/build/rpm/etc/init.d/{{ item }}"
+    dest: "{{ bin_dir }}-{{ item[0] }}"
+    src: "{{ kaia_build_dir }}-{{ item[0] }}/build/rpm/etc/init.d/{{ item[1] }}"
     mode: preserve
-  loop:
-    - kbnd
-    - kcnd
-    - kpnd
-    - kend
-    - kscnd
-    - kspnd
-    - ksend
-  when:
-    - kaia_build_required
+  when: not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  with_nested:
+    - "{{ range(0, total_builds | int) | list }}"
+    - ['kbnd', 'kcnd', 'kpnd', 'kend', 'kscnd', 'kspnd', 'ksend']
 
 - name: Build - Creating an empty file for checking
   ansible.builtin.file:
-    path: "{{ kaia_build_check_file_path }}"
+    path: "{{ kaia_build_check_file_path }}-{{ item }}"
     state: touch
-  when:
-    - kaia_build_required
+  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  loop: "{{ range(0, total_builds | int) | list }}"

@@ -6,17 +6,29 @@
     state: present
   when: ansible_os_family == "RedHat"
 
+- name: "Extract instance index from hostname"
+  set_fact:
+    instance_index: "{{ inventory_hostname | regex_replace('.*[a-z](\\d+)', '\\1') | int - 1 if inventory_hostname | regex_search('[a-z]\\d+$') else 0 }}"
+
+- name: "Calculate build count"
+  set_fact:
+    build_count: "{{ (deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url) | length) if (deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url)) is iterable and (deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url)) is not string else 1 }}"
+
+- name: "Set instance bin directory"
+  set_fact:
+    instance_bin_dir: "{{ bin_dir }}-{{ instance_index | int % build_count | int }}"
+
 - name: "Installation - Copy kaia binary"
   become: yes
   copy:
-    src: "{{ bin_dir }}/{{ kaia_binary_name }}"
+    src: "{{ instance_bin_dir }}/{{ kaia_binary_name }}"
     dest: "/bin/{{ kaia_binary_name }}"
     mode: preserve
 
 - name: "Installation - Copy kaia init.d script"
   become: yes
   copy:
-    src: "{{ bin_dir }}/{{ kaia_daemon_name }}"
+    src: "{{ instance_bin_dir }}/{{ kaia_daemon_name }}"
     dest: "/etc/init.d/{{ kaia_daemon_name }}"
     mode: preserve
 
