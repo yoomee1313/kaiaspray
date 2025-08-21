@@ -57,7 +57,7 @@
 - name: Build - Copy homi binary
   ansible.builtin.copy:
     dest: "{{ bin_dir }}-{{ item }}/homi"
-    src: "{{ kaia_build_dir }}-{{ item }}/output/klaytn-docker-pkg/bin/homi"
+    src: "{{ kaia_build_dir }}-{{ item }}/build/bin/homi"
     mode: preserve
   when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
   loop: "{{ range(0, total_builds | int) | list }}"
