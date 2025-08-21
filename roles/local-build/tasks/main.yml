@@ -23,9 +23,9 @@
 
 - name: Build - Git checkout
   ansible.builtin.git:
-    repo: "{{ git_url[item] if git_url is iterable and git_url is not string else git_url }}"
+    repo: "{{ git_url[item % git_url | length] if git_url is iterable and git_url is not string else git_url }}"
     dest: "{{ kaia_build_dir }}-{{ item }}"
-    version: "{{ git_branch[item] if git_branch is iterable and git_branch is not string else git_branch }}"
+    version: "{{ git_branch[item % git_branch | length] if git_branch is iterable and git_branch is not string else git_branch }}"
   when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
   loop: "{{ range(0, total_builds | int) | list }}"
 
