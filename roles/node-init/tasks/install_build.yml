@@ -10,13 +10,31 @@
   set_fact:
     node_index: "{{ groups[kaia_node_type].index(inventory_hostname) }}"
 
+- name: Set build variables
+  set_fact:
+    git_url: "{{ deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url) }}"
+    git_branch: "{{ deploy_options.kaia_build_remote_git_branch | default(kaia_build_remote_git_branch) }}"
+
 - name: "Calculate build count"
   set_fact:
-    build_count: "{{ (deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url) | length) if (deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url)) is iterable and (deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url)) is not string else 1 }}"
+    build_count: "{{ [git_url | length if git_url is iterable and git_url is not string else 1, git_branch | length if git_branch is iterable and git_branch is not string else 1] | max }}"
+
+- name: Create build identifiers for each build
+  set_fact:
+    build_identifiers: "{{ [] }}"
+    
+- name: Generate build identifier for each build
+  set_fact:
+    build_identifiers: "{{ build_identifiers + [(build_owner | first + '-' + build_branch)] }}"
+  vars:
+    current_git_url: "{{ git_url[item % git_url | length] if git_url is iterable and git_url is not string else git_url }}"
+    build_owner: "{{ current_git_url | regex_search('[:/](?P<owner>[^/]+)/[^/]+$', '\\g<owner>') }}"
+    build_branch: "{{ git_branch[item % git_branch | length] if git_branch is iterable and git_branch is not string else git_branch }}"
+  loop: "{{ range(0, build_count | int) | list }}"
 
 - name: "Set instance bin directory"
   set_fact:
-    instance_bin_dir: "{{ bin_dir }}-{{ node_index | int % build_count | int }}"
+    instance_bin_dir: "{{ bin_dir }}-{{ build_identifiers[node_index | int % build_count | int] }}"
 
 - name: "Installation - Copy kaia binary"
   become: yes
