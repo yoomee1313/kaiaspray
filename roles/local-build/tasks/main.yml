@@ -68,7 +68,9 @@
     - "{{ range(0, total_builds | int) | list }}"
     - ['kbn', 'kcn', 'kpn', 'ken', 'kscn', 'kspn', 'ksen']
 
-# We need to copy homi binary for the first build only
+# There may be multiple git dirs to build different versions of kaia binaries,
+# however we don't need to use different versions of homi to generate genesis and node keys.
+# So we use the first git dir to build and run homi.
 - name: Build - Compile homi binary locally
   ansible.builtin.command: |
     make homi
