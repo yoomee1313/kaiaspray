@@ -140,6 +140,11 @@ The `deploy_options` block configures deployment settings for your Kaia nodes:
    - `kaia_network_id`: Unique identifier for your network
    - `kaia_chain_id`: Chain identifier for your network
 
+5. **Git URL and branch**:
+   - `kaia_build_remote_git_url`: Git URLs to clone and build kaia (could be string or array of strings)
+   - `kaia_build_remote_git_branch`: Git branch to clone and build kaia (could be string or array of strings)
+   - Note that only different versions of Kaia **node** binaries would be used (i.e., only one version of homi will be used regardless of the number of git URL and branch)
+
 ### Example terraform.tfvars
 ```
 deploy_options = {
@@ -148,5 +153,7 @@ deploy_options = {
   kaia_build_docker_base_image = "kaiachain/build_base:latest"
   kaia_network_id = 9999
   kaia_chain_id   = 9999
+  kaia_build_remote_git_url = ["https://github.com/kaiachain/kaia.git", "https://github.com/yourname/kaia.git"]
+  kaia_build_remote_git_branch = ["dev", "my-feature-branch"]
 }
 ```
