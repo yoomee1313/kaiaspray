@@ -19,9 +19,9 @@
 
 - name: Build kaia binaries
   include_role:
-    name: local-build
+    name: build
   when:
-  - kaia_install_mode == "build"
+  - kaia_install_mode in ["build", "build_remote"]
   tags:
   - localhost
   
