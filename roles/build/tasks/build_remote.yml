@@ -1,0 +1,171 @@
+---
+- name: Build Remote - Check compiled binary
+  ansible.builtin.stat:
+    path: "{{ kaia_build_check_file_path }}"
+  register: kaia_build_check_file_stat
+
+- name: Build Remote - Check skipping compile
+  ansible.builtin.set_fact:
+    kaia_build_required: True
+  when:
+    - kaia_build_check_file_stat.stat.exists == False or 
+      kaia_build_skip_if_exists == False
+
+- name: Build Remote - Get first available host from inventory
+  ansible.builtin.set_fact:
+    remote_build_host: "{{ (groups['cn'] + groups['pn'] + groups['en'])[0] }}"
+
+- name: Build Remote - Install build dependencies
+  block:
+    - name: Update package cache
+      ansible.builtin.shell: |
+        sudo yum makecache
+      args:
+        executable: /bin/bash
+
+    - name: Install essential build tools
+      ansible.builtin.shell: |
+        sudo yum install -y git make gcc curl wget unzip which
+      args:
+        executable: /bin/bash
+
+    - name: Check if Go is installed
+      ansible.builtin.command: which go
+      register: go_check
+      ignore_errors: yes
+      changed_when: false
+
+    - name: Install Go if not present
+      block:
+        - name: Download Go
+          ansible.builtin.get_url:
+            url: "https://golang.org/dl/go1.23.0.linux-amd64.tar.gz"
+            dest: "~/go1.23.0.linux-amd64.tar.gz"
+            mode: '0644'
+          become: yes
+
+        - name: Extract Go
+          ansible.builtin.unarchive:
+            src: "~/go1.23.0.linux-amd64.tar.gz"
+            dest: "/usr/local"
+            remote_src: yes
+          become: yes
+
+        - name: Add Go to PATH
+          ansible.builtin.lineinfile:
+            path: "~/.bashrc"
+            line: 'export PATH=$PATH:/usr/local/go/bin'
+            state: present
+
+        - name: Set Go PATH for current session
+          ansible.builtin.set_fact:
+            ansible_env:
+              PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+      when: go_check.rc != 0
+  delegate_to: "{{ remote_build_host }}"
+  when: kaia_build_required
+
+- name: Build Remote - Create remote build directory
+  ansible.builtin.file:
+    path: "~/kaia_build"
+    state: directory
+    mode: '0755'
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Clean remote build directory
+  ansible.builtin.file:
+    state: absent
+    path: "~/kaia_build"
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Git checkout
+  ansible.builtin.git:
+    repo: "{{ kaia_build_remote_git_url }}"
+    dest: "~/kaia_build"
+    version: "{{ kaia_build_remote_git_branch }}"
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Compile kaia binary
+  ansible.builtin.command: make all
+  args:
+    chdir: "~/kaia_build"
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Fetch kaia binary files
+  ansible.builtin.fetch:
+    src: "~/kaia_build/build/bin/{{ item }}"
+    dest: "{{ bin_dir }}/"
+    flat: yes
+  loop:
+    - kbn
+    - kcn
+    - kpn
+    - ken
+    - kscn
+    - kspn
+    - ksen
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Fetch kaia init.d script files
+  ansible.builtin.fetch:
+    src: "~/kaia_build/build/rpm/etc/init.d/{{ item }}"
+    dest: "{{ bin_dir }}/"
+    flat: yes
+  loop:
+    - kbnd
+    - kcnd
+    - kpnd
+    - kend
+    - kscnd
+    - kspnd
+    - ksend
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Set correct permissions for binary files
+  ansible.builtin.file:
+    path: "{{ bin_dir }}/{{ item }}"
+    mode: '0755'
+  loop:
+    - kbn
+    - kcn
+    - kpn
+    - ken
+    - kscn
+    - kspn
+    - ksen
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Set correct permissions for init.d script files
+  ansible.builtin.file:
+    path: "{{ bin_dir }}/{{ item }}"
+    mode: '0755'
+  loop:
+    - kbnd
+    - kcnd
+    - kpnd
+    - kend
+    - kscnd
+    - kspnd
+    - ksend
+  when:
+    - kaia_build_required
+
+- name: Build Remote - Creating an empty file for checking
+  ansible.builtin.file:
+    path: "{{ kaia_build_check_file_path }}"
+    state: touch
+  when:
+    - kaia_build_required

@@ -4,7 +4,8 @@
   roles:
   - { role: kaiaspray-defaults }
   - { role: local-init }
-  - { role: local-build, when: kaia_install_mode == 'build' }
+  - role: build
+    when: kaia_install_mode in ['build', 'build_remote']
   tags:
   - localhost
 
