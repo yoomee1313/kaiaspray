@@ -19,7 +19,9 @@ deploy_options = {
   kaia_version = "v1.0.3"
   kaia_build_docker_base_image = "kaiachain/build_base:latest"
   #kaia_build_remote_git_url = "git@github.com:kaiachain/kaia.git"
-  #kaia_build_remote_git_branch = "dev"
+  # You can specify multiple repos
+  #kaia_build_remote_git_url = ["git@github.com:kaiachain/kaia.git", "git@github.com:kaiachain/kaia.git"]
+  #kaia_build_remote_git_branch = "dev" # This also supports multiple branch names with array
   #kaia_network = "kairos"
   kaia_network_id = 9999
   kaia_chain_id   = 9999
