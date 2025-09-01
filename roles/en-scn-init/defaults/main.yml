@@ -50,5 +50,10 @@ kaia_port: 32323
 
 homi_output_dir: /opt/homi
 homi_default_options: ""
-homi_extra_options: ""
+homi_extra_options_cn: ""
+homi_extra_options_pn: ""
+homi_extra_options_en: ""
+homi_extra_options_scn: ""
+homi_extra_options_spn: ""
+homi_extra_options_sen: ""
 homi_test_account_num: 2

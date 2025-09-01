@@ -1,6 +1,11 @@
 homi_bin: "{{ bin_dir }}/homi"
 homi_default_options: ""
-homi_extra_options: ""
+homi_extra_options_cn: ""
+homi_extra_options_pn: ""
+homi_extra_options_en: ""
+homi_extra_options_scn: ""
+homi_extra_options_spn: ""
+homi_extra_options_sen: ""
 homi_test_account_num: 16
 
 force_create_genesis: False
