@@ -144,6 +144,7 @@ The `deploy_options` block configures deployment settings for your Kaia nodes:
    - `kaia_build_remote_git_url`: Git URLs to clone and build kaia (could be string or array of strings)
    - `kaia_build_remote_git_branch`: Git branch to clone and build kaia (could be string or array of strings)
    - Note that only different versions of Kaia **node** binaries would be used (i.e., only one version of homi will be used regardless of the number of git URL and branch)
+   - Multi-git builds are supported for both `build` and `build_remote` install modes
 
 ### Example terraform.tfvars
 ```

@@ -1,14 +1,37 @@
 ---
+- name: Set build variables
+  set_fact:
+    git_url: "{{ deploy_options.kaia_build_remote_git_url | default(kaia_build_remote_git_url) }}"
+    git_branch: "{{ deploy_options.kaia_build_remote_git_branch | default(kaia_build_remote_git_branch) }}"
+
+- name: Calculate total builds
+  set_fact:
+    total_builds: "{{ [git_url | length if git_url is iterable and git_url is not string else 1, git_branch | length if git_branch is iterable and git_branch is not string else 1] | max }}"
+
+- name: Create build identifiers for each build
+  set_fact:
+    build_identifiers: "{{ [] }}"
+
+- name: Generate build identifier for each build
+  set_fact:
+    build_identifiers: "{{ build_identifiers + [(build_owner | first + '-' + build_branch)] }}"
+  vars:
+    current_git_url: "{{ git_url[item % git_url | length] if git_url is iterable and git_url is not string else git_url }}"
+    build_owner: "{{ current_git_url | regex_search('[:/](?P<owner>[^/]+)/[^/]+$', '\\g<owner>') }}"
+    build_branch: "{{ git_branch[item % git_branch | length] if git_branch is iterable and git_branch is not string else git_branch }}"
+  loop: "{{ range(0, total_builds | int) | list }}"
+
 - name: Build Remote - Check compiled binary
   ansible.builtin.stat:
-    path: "{{ kaia_build_check_file_path }}"
-  register: kaia_build_check_file_stat
+    path: "{{ kaia_build_check_file_path }}-{{ build_identifiers[item] }}"
+  register: kaia_build_check_file_stats
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build Remote - Check skipping compile
   ansible.builtin.set_fact:
     kaia_build_required: True
   when:
-    - kaia_build_check_file_stat.stat.exists == False or 
+    - kaia_build_check_file_stats.results | selectattr('stat.exists', 'equalto', false) | list | length > 0 or 
       kaia_build_skip_if_exists == False
 
 - name: Build Remote - Get first available host from inventory
@@ -65,131 +88,147 @@
   delegate_to: "{{ remote_build_host }}"
   when: kaia_build_required
 
-- name: Build Remote - Create remote build directory
+- name: Build Remote - Create remote build directories
   ansible.builtin.file:
-    path: "~/kaia_build"
+    path: "~/kaia_build-{{ build_identifiers[item] }}"
     state: directory
     mode: '0755'
   delegate_to: "{{ remote_build_host }}"
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists
+  loop: "{{ range(0, total_builds | int) | list }}"
 
-- name: Build Remote - Clean remote build directory
+- name: Build Remote - Clean remote build directories
   ansible.builtin.file:
     state: absent
-    path: "~/kaia_build"
+    path: "~/kaia_build-{{ build_identifiers[item] }}"
   delegate_to: "{{ remote_build_host }}"
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build Remote - Git checkout
   ansible.builtin.git:
-    repo: "{{ kaia_build_remote_git_url }}"
-    dest: "~/kaia_build"
-    version: "{{ kaia_build_remote_git_branch }}"
+    repo: "{{ git_url[item % git_url | length] if git_url is iterable and git_url is not string else git_url }}"
+    dest: "~/kaia_build-{{ build_identifiers[item] }}"
+    version: "{{ git_branch[item % git_branch | length] if git_branch is iterable and git_branch is not string else git_branch }}"
   delegate_to: "{{ remote_build_host }}"
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build Remote - Compile kaia binary
   ansible.builtin.command: make all
   args:
-    chdir: "~/kaia_build"
+    chdir: "~/kaia_build-{{ build_identifiers[item] }}"
   delegate_to: "{{ remote_build_host }}"
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists
+  loop: "{{ range(0, total_builds | int) | list }}"
+
+
+- name: Build Remote - Create bin directories
+  ansible.builtin.file:
+    path: "{{ bin_dir }}-{{ build_identifiers[item] }}"
+    state: directory
+  when:
+    - kaia_build_required
+    - not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists
+  loop: "{{ range(0, total_builds | int) | list }}"
+
+- name: Build Remote - Fetch kaia binary files
+  ansible.builtin.fetch:
+    src: "~/kaia_build-{{ build_identifiers[item[0]] }}/build/bin/{{ item[1] }}"
+    dest: "{{ bin_dir }}-{{ build_identifiers[item[0]] }}/"
+    flat: yes
+  with_nested:
+    - "{{ range(0, total_builds | int) | list }}"
+    - ['kbn', 'kcn', 'kpn', 'ken', 'kscn', 'kspn', 'ksen']
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+    - not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists
+
+- name: Build Remote - Fetch kaia init.d script files
+  ansible.builtin.fetch:
+    src: "~/kaia_build-{{ build_identifiers[item[0]] }}/build/rpm/etc/init.d/{{ item[1] }}"
+    dest: "{{ bin_dir }}-{{ build_identifiers[item[0]] }}/"
+    flat: yes
+  with_nested:
+    - "{{ range(0, total_builds | int) | list }}"
+    - ['kbnd', 'kcnd', 'kpnd', 'kend', 'kscnd', 'kspnd', 'ksend']
+  delegate_to: "{{ remote_build_host }}"
+  when:
+    - kaia_build_required
+    - not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists
+
+- name: Build Remote - Set correct permissions for binary files
+  ansible.builtin.file:
+    path: "{{ bin_dir }}-{{ build_identifiers[item[0]] }}/{{ item[1] }}"
+    mode: '0755'
+  with_nested:
+    - "{{ range(0, total_builds | int) | list }}"
+    - ['kbn', 'kcn', 'kpn', 'ken', 'kscn', 'kspn', 'ksen']
+  when:
+    - kaia_build_required
+    - not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists
+
+- name: Build Remote - Set correct permissions for init.d script files
+  ansible.builtin.file:
+    path: "{{ bin_dir }}-{{ build_identifiers[item[0]] }}/{{ item[1] }}"
+    mode: '0755'
+  with_nested:
+    - "{{ range(0, total_builds | int) | list }}"
+    - ['kbnd', 'kcnd', 'kpnd', 'kend', 'kscnd', 'kspnd', 'ksend']
+  when:
+    - kaia_build_required
+    - not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists
 
 - name: Build Remote - Git checkout for homi (local)
   ansible.builtin.git:
-    repo: "{{ kaia_build_remote_git_url }}"
-    dest: "{{ kaia_build_dir }}"
-    version: "{{ kaia_build_remote_git_branch }}"
+    repo: "{{ git_url[0] if git_url is iterable and git_url is not string else git_url }}"
+    dest: "{{ kaia_build_dir }}-{{ build_identifiers[0] }}"
+    version: "{{ git_branch[0] if git_branch is iterable and git_branch is not string else git_branch }}"
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[0].stat.exists or not kaia_build_skip_if_exists
 
 - name: Build Remote - Compile homi binary locally
   ansible.builtin.command: |
     make homi
   args:
-    chdir: "{{ kaia_build_dir }}"
+    chdir: "{{ kaia_build_dir }}-{{ build_identifiers[0] }}"
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[0].stat.exists or not kaia_build_skip_if_exists
 
 - name: Build Remote - Copy homi binary
   ansible.builtin.copy:
-    dest: "{{ bin_dir }}/homi"
-    src: "{{ kaia_build_dir }}/build/bin/homi"
+    dest: "{{ bin_dir }}-{{ build_identifiers[0] }}/homi"
+    src: "{{ kaia_build_dir }}-{{ build_identifiers[0] }}/build/bin/homi"
     mode: preserve
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[0].stat.exists or not kaia_build_skip_if_exists
 
-- name: Build Remote - Fetch kaia binary files
-  ansible.builtin.fetch:
-    src: "~/kaia_build/build/bin/{{ item }}"
-    dest: "{{ bin_dir }}/"
-    flat: yes
-  loop:
-    - kbn
-    - kcn
-    - kpn
-    - ken
-    - kscn
-    - kspn
-    - ksen
-  delegate_to: "{{ remote_build_host }}"
-  when:
-    - kaia_build_required
-
-- name: Build Remote - Fetch kaia init.d script files
-  ansible.builtin.fetch:
-    src: "~/kaia_build/build/rpm/etc/init.d/{{ item }}"
-    dest: "{{ bin_dir }}/"
-    flat: yes
-  loop:
-    - kbnd
-    - kcnd
-    - kpnd
-    - kend
-    - kscnd
-    - kspnd
-    - ksend
-  delegate_to: "{{ remote_build_host }}"
-  when:
-    - kaia_build_required
-
-- name: Build Remote - Set correct permissions for binary files
+- name: Build Remote - Create symbolic link to first bin directory
   ansible.builtin.file:
-    path: "{{ bin_dir }}/{{ item }}"
-    mode: '0755'
-  loop:
-    - kbn
-    - kcn
-    - kpn
-    - ken
-    - kscn
-    - kspn
-    - ksen
-  when:
-    - kaia_build_required
-
-- name: Build Remote - Set correct permissions for init.d script files
-  ansible.builtin.file:
-    path: "{{ bin_dir }}/{{ item }}"
-    mode: '0755'
-  loop:
-    - kbnd
-    - kcnd
-    - kpnd
-    - kend
-    - kscnd
-    - kspnd
-    - ksend
-  when:
+    src: "{{ bin_dir }}-{{ build_identifiers[0] }}"
+    dest: "{{ bin_dir }}"
+    state: link
+  when: 
+    - total_builds | int > 0
     - kaia_build_required
 
 - name: Build Remote - Creating an empty file for checking
   ansible.builtin.file:
-    path: "{{ kaia_build_check_file_path }}"
+    path: "{{ kaia_build_check_file_path }}-{{ item }}"
     state: touch
   when:
     - kaia_build_required
+    - not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists
+  loop: "{{ range(0, total_builds | int) | list }}"
