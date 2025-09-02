@@ -21,17 +21,10 @@
     build_branch: "{{ git_branch[item % git_branch | length] if git_branch is iterable and git_branch is not string else git_branch }}"
   loop: "{{ range(0, total_builds | int) | list }}"
 
-- name: Build - Check compiled binary
+- name: Build - Check directory exists
   ansible.builtin.stat:
     path: "{{ kaia_build_check_file_path }}-{{ build_identifiers[item] }}"
   register: kaia_build_check_file_stats
-  loop: "{{ range(0, total_builds | int) | list }}"
-
-- name: Build - Clean the old directory
-  ansible.builtin.file:
-    state: absent
-    path: "{{ kaia_build_dir }}-{{ build_identifiers[item] }}"
-  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
   loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Git checkout
@@ -40,12 +33,29 @@
     dest: "{{ kaia_build_dir }}-{{ build_identifiers[item] }}"
     version: "{{ git_branch[item % git_branch | length] if git_branch is iterable and git_branch is not string else git_branch }}"
   loop: "{{ range(0, total_builds | int) | list }}"
+  register: git_info
+
+- name: Build - Check skipping compile
+  set_fact:
+    # Build required if:
+    # - dir does not exist
+    # - skip flag is false
+    # - repo HEAD changed
+    # - force compile is true
+    kaia_build_required: >-
+      {{ (kaia_build_required | default([])) + [ (
+          kaia_build_check_file_stats.results[item].stat.exists == False
+          or kaia_build_skip_if_exists == False
+          or git_info.results[item].before != git_info.results[item].after
+          or kaia_build_force_compile == True
+      ) ] }}
+  loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Create bin directory
   ansible.builtin.file:
     path: "{{ bin_dir }}-{{ build_identifiers[item] }}"
     state: directory
-  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  when: kaia_build_required[item]
   loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Compile kaia binary
@@ -55,7 +65,7 @@
     chdir: "{{ kaia_build_dir }}-{{ build_identifiers[item] }}"
   environment:
     DOCKER_BUILDKIT: 1
-  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  when: kaia_build_required[item]
   loop: "{{ range(0, total_builds | int) | list }}"
 
 - name: Build - Copy kaia binary files
@@ -63,7 +73,7 @@
     dest: "{{ bin_dir }}-{{ build_identifiers[item[0]] }}"
     src: "{{ kaia_build_dir }}-{{ build_identifiers[item[0]] }}/output/klaytn-docker-pkg/bin/{{ item[1] }}"
     mode: preserve
-  when: not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  when: kaia_build_required[item[0]]
   with_nested:
     - "{{ range(0, total_builds | int) | list }}"
     - ['kbn', 'kcn', 'kpn', 'ken', 'kscn', 'kspn', 'ksen']
@@ -76,7 +86,7 @@
     make homi
   args:
     chdir: "{{ kaia_build_dir }}-{{ build_identifiers[0] }}"
-  when: not kaia_build_check_file_stats.results[0].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  when: kaia_build_required[0]
 
 - name: Build - Copy homi binary
   ansible.builtin.copy:
@@ -96,14 +106,14 @@
     dest: "{{ bin_dir }}-{{ build_identifiers[item[0]] }}"
     src: "{{ kaia_build_dir }}-{{ build_identifiers[item[0]] }}/build/rpm/etc/init.d/{{ item[1] }}"
     mode: preserve
-  when: not kaia_build_check_file_stats.results[item[0]].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  when: kaia_build_required[item[0]]
   with_nested:
     - "{{ range(0, total_builds | int) | list }}"
     - ['kbnd', 'kcnd', 'kpnd', 'kend', 'kscnd', 'kspnd', 'ksend']
 
 - name: Build - Creating an empty file for checking
   ansible.builtin.file:
-    path: "{{ kaia_build_check_file_path }}-{{ item }}"
+    path: "{{ kaia_build_check_file_path }}-{{ build_identifiers[item] }}"
     state: touch
-  when: not kaia_build_check_file_stats.results[item].stat.exists or not kaia_build_skip_if_exists or kaia_build_required
+  when: kaia_build_required[item]
   loop: "{{ range(0, total_builds | int) | list }}"
