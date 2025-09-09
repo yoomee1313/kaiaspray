@@ -18,6 +18,16 @@ resource "google_compute_instance" "this" {
       source      = google_compute_disk.this[0].self_link
       device_name = lookup(var.compute_disk, "name", "data-disk")
     }
+
+  }
+
+  dynamic "service_account" {
+    for_each = var.service_account != null ? [1] : []
+
+    content {
+      email  = lookup(var.service_account, "email", null)
+      scopes = lookup(var.service_account, "scopes", ["default"])
+    }
   }
 
   network_interface {

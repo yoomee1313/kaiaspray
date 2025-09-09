@@ -69,3 +69,9 @@ variable "metadata" {
   type        = map(any)
   description = "Metadata array"
 }
+
+variable "service_account" {
+  type        = map(any)
+  description = "Service account to attach to the instance"
+  default     = null
+}
