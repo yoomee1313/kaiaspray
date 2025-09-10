@@ -21,6 +21,7 @@ locals {
       boot_disk_size = try(lookup(var.cn_options, "options", {})[tostring(i)].boot_disk_size, lookup(var.cn_options, "boot_disk_size", local.defaults.boot_disk_size))
       compute_disk_size = try(lookup(var.cn_options, "options", {})[tostring(i)].compute_disk_size, lookup(var.cn_options, "compute_disk_size", local.defaults.compute_disk_size))
       snapshot_id = try(lookup(var.cn_options, "options", {})[tostring(i)].snapshot_id, lookup(var.cn_options, "snapshot_id", local.defaults.snapshot_id))
+      service_account = try(lookup(var.cn_options, "options", {})[tostring(i)].service_account, lookup(var.cn_options, "service_account", null))
     }
   ]
 
@@ -30,6 +31,7 @@ locals {
       boot_disk_size = try(lookup(var.pn_options, "options", {})[tostring(i)].boot_disk_size, lookup(var.pn_options, "boot_disk_size", local.defaults.boot_disk_size))
       compute_disk_size = try(lookup(var.pn_options, "options", {})[tostring(i)].compute_disk_size, lookup(var.pn_options, "compute_disk_size", local.defaults.compute_disk_size))
       snapshot_id = try(lookup(var.pn_options, "options", {})[tostring(i)].snapshot_id, lookup(var.pn_options, "snapshot_id", local.defaults.snapshot_id))
+      service_account = try(lookup(var.pn_options, "options", {})[tostring(i)].service_account, lookup(var.pn_options, "service_account", null))
     }
   ]
 
@@ -39,6 +41,7 @@ locals {
       boot_disk_size = try(lookup(var.en_options, "options", {})[tostring(i)].boot_disk_size, lookup(var.en_options, "boot_disk_size", local.defaults.boot_disk_size))
       compute_disk_size = try(lookup(var.en_options, "options", {})[tostring(i)].compute_disk_size, lookup(var.en_options, "compute_disk_size", local.defaults.compute_disk_size))
       snapshot_id = try(lookup(var.en_options, "options", {})[tostring(i)].snapshot_id, lookup(var.en_options, "snapshot_id", local.defaults.snapshot_id))
+      service_account = try(lookup(var.en_options, "options", {})[tostring(i)].service_account, lookup(var.en_options, "service_account", null))
     }
   ]
 }

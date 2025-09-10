@@ -71,7 +71,10 @@ variable "metadata" {
 }
 
 variable "service_account" {
-  type        = map(any)
+  type = object({
+    email  = optional(string)
+    scopes = optional(list(string))
+  })
   description = "Service account to attach to the instance"
   default     = null
 }
