@@ -32,6 +32,8 @@ module "cn" {
   metadata = merge(var.metadata, {
     Name = format("%s-cn-%d", var.name, count.index + 1)
   })
+
+  service_account = local.get_cn_node_options[count.index].service_account
 }
 
 module "pn" {
@@ -68,6 +70,8 @@ module "pn" {
   metadata = merge(var.metadata, {
     Name = format("%s-pn-%d", var.name, count.index + 1)
   })
+
+  service_account = local.get_pn_node_options[count.index].service_account
 }
 
 module "en" {
@@ -104,6 +108,8 @@ module "en" {
   metadata = merge(var.metadata, {
     Name = format("%s-en-%d", var.name, count.index + 1)
   })
+
+  service_account = local.get_en_node_options[count.index].service_account
 }
 
 module "monitor" {
@@ -136,6 +142,8 @@ module "monitor" {
   metadata = merge(var.metadata, {
     Name = format("%s-monitor", var.name)
   })
+
+  service_account = null
 }
 
 # Provisioner for CN nodes with compute disk
