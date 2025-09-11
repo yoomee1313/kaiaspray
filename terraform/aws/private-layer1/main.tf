@@ -13,7 +13,7 @@ module "layer1" {
   ssh_client_ips = var.ssh_client_ips
 
   cn_options      = var.cn_options
-  pn_options      = var.cn_options
+  pn_options      = var.pn_options
   en_options      = var.en_options
   monitor_options = var.monitor_options
 
