@@ -4,8 +4,9 @@ module "layer1" {
   name = local.name
 
   aws_region = var.aws_region
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.public_subnets
+  vpc_id     = var.vpc_id != null ? var.vpc_id : module.vpc[0].vpc_id
+  subnet_ids = length(var.subnet_ids) > 0 ? var.subnet_ids : module.vpc[0].public_subnets
+  security_group_id = var.security_group_id
 
   ami_id         = data.aws_ami.this.id
   key_name       = local.key_name
