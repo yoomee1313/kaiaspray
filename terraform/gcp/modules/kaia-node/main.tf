@@ -31,7 +31,8 @@ resource "google_compute_instance" "this" {
   }
 
   network_interface {
-    subnetwork = var.subnetwork
+    network    = var.network != "" ? var.network : null
+    subnetwork = var.subnetwork != "" ? var.subnetwork : null
 
     dynamic "access_config" {
       for_each = var.use_public_ip == true ? [1] : []
