@@ -38,6 +38,7 @@ class ModuleRunner(object):
         self.homi_output_dir = module.params['homi_output_dir']
         self.is_service_chain = module.params['is_service_chain']
         self.topology = module.params['topology']
+        self.use_public_ip = module.params['use_public_ip']
 
         self.validate_params()
 
@@ -83,7 +84,8 @@ class ModuleRunner(object):
             for v2 in v1:
                 node_type2, node_num2 = split_node_name(v2)
                 validator = self.read_validator(node_type2, node_num2)
-                result['static_nodes'][k1]['knis'].append(validator['NodeInfo'])
+                kni_key = 'NodeInfo' if self.use_public_ip else 'PrivateNodeInfo'
+                result['static_nodes'][k1]['knis'].append(validator[kni_key])
 
         return result
 
@@ -94,6 +96,7 @@ def main():
             homi_output_dir=dict(type='str', required=True),
             is_service_chain=dict(type='bool', default=False),
             topology=dict(type='dict', required=True),
+            use_public_ip=dict(type='bool', default=True),
         ),
         supports_check_mode=False
     )
@@ -106,4 +109,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -9,3 +9,4 @@ homi_extra_options_sen: ""
 homi_test_account_num: 16
 
 force_create_genesis: False
+static_nodes_use_public_ip: False

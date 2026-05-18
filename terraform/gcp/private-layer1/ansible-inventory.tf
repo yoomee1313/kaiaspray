@@ -22,6 +22,7 @@ locals {
       kaia_network      = try(var.deploy_options.kaia_network, "")
       kaia_network_id   = try(var.deploy_options.kaia_network_id, "")
       kaia_chain_id     = try(var.deploy_options.kaia_chain_id, "")
+      static_nodes_use_public_ip = try(var.deploy_options.static_nodes_use_public_ip, false)
       homi_extra_options_cn  = try(var.deploy_options.homi_extra_options.cn, "")
       homi_extra_options_pn  = try(var.deploy_options.homi_extra_options.pn, "")
       homi_extra_options_en  = try(var.deploy_options.homi_extra_options.en, "")
