@@ -25,6 +25,7 @@ deploy_options = {
   #kaia_network = "kairos"
   kaia_network_id = 9999
   kaia_chain_id   = 9999
+  # static_nodes_use_public_ip = true
   # homi_extra_options = ""
 }
 
@@ -33,6 +34,21 @@ cn_options = {
   machine_type   = "n2-standard-2"
   boot_disk_size = 30
   # compute_disk_size = 100 # if you set compute_disk_size, it will be protected if you delete MANUALLY. So, be aware of this, and please run "destroy" command when you want to delete the node.
+  # spot           = true
+  # options = {
+  #   0 : {
+  #     region      = ""
+  #     subnetwork  = ""
+  #   }
+  #   1 : {
+  #     region     = ""
+  #     subnetwork = ""
+  #   }
+  #   2 : {
+  #     region     = ""
+  #     subnetwork = ""
+  #   }
+  # }
 }
 
 pn_options = {
