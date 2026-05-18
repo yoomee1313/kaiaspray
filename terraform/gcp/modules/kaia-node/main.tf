@@ -48,6 +48,18 @@ resource "google_compute_instance" "this" {
   metadata = merge(
     var.metadata,
   )
+
+  dynamic "scheduling" {
+    for_each = var.spot ? [1] : []
+
+    content {
+      automatic_restart           = false
+      instance_termination_action = var.spot_instance_termination_action
+      on_host_maintenance         = "TERMINATE"
+      preemptible                 = true
+      provisioning_model          = "SPOT"
+    }
+  }
 }
 
 resource "google_compute_disk" "this" {

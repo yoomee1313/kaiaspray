@@ -78,3 +78,15 @@ variable "service_account" {
   description = "Service account to attach to the instance"
   default     = null
 }
+
+variable "spot" {
+  type        = bool
+  description = "Create this instance as a Spot VM"
+  default     = false
+}
+
+variable "spot_instance_termination_action" {
+  type        = string
+  description = "Termination action for Spot VM preemption"
+  default     = "STOP"
+}

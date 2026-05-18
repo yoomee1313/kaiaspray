@@ -9,6 +9,8 @@ locals {
     zone = null
     network = var.network
     subnetwork = var.subnetwork
+    spot = false
+    spot_instance_termination_action = "STOP"
   }
 
   zone_suffixes = ["a", "b", "c"]
@@ -24,6 +26,8 @@ locals {
     zone = lookup(var.monitor_options, "zone", local.default_zone)
     network = lookup(var.monitor_options, "network", local.defaults.network)
     subnetwork = lookup(var.monitor_options, "subnetwork", local.defaults.subnetwork)
+    spot = try(var.monitor_options.spot, try(var.monitor_options.spot_vm, try(var.monitor_options.preemptible, false)))
+    spot_instance_termination_action = lookup(var.monitor_options, "spot_instance_termination_action", local.defaults.spot_instance_termination_action)
   }
 
   # Generate node options lists - can be used like get_cn_node_options[0]
@@ -38,6 +42,8 @@ locals {
       zone = try(lookup(var.cn_options, "options", {})[tostring(i)].zone, lookup(var.cn_options, "zone", null))
       network = try(lookup(var.cn_options, "options", {})[tostring(i)].network, lookup(var.cn_options, "network", local.defaults.network))
       subnetwork = try(lookup(var.cn_options, "options", {})[tostring(i)].subnetwork, lookup(var.cn_options, "subnetwork", local.defaults.subnetwork))
+      spot = try(lookup(var.cn_options, "options", {})[tostring(i)].spot, try(lookup(var.cn_options, "options", {})[tostring(i)].spot_vm, try(lookup(var.cn_options, "options", {})[tostring(i)].preemptible, try(var.cn_options.spot, try(var.cn_options.spot_vm, try(var.cn_options.preemptible, false))))))
+      spot_instance_termination_action = try(lookup(var.cn_options, "options", {})[tostring(i)].spot_instance_termination_action, lookup(var.cn_options, "spot_instance_termination_action", local.defaults.spot_instance_termination_action))
     }
   ]
 
@@ -52,6 +58,8 @@ locals {
       zone = try(lookup(var.pn_options, "options", {})[tostring(i)].zone, lookup(var.pn_options, "zone", null))
       network = try(lookup(var.pn_options, "options", {})[tostring(i)].network, lookup(var.pn_options, "network", local.defaults.network))
       subnetwork = try(lookup(var.pn_options, "options", {})[tostring(i)].subnetwork, lookup(var.pn_options, "subnetwork", local.defaults.subnetwork))
+      spot = try(lookup(var.pn_options, "options", {})[tostring(i)].spot, try(lookup(var.pn_options, "options", {})[tostring(i)].spot_vm, try(lookup(var.pn_options, "options", {})[tostring(i)].preemptible, try(var.pn_options.spot, try(var.pn_options.spot_vm, try(var.pn_options.preemptible, false))))))
+      spot_instance_termination_action = try(lookup(var.pn_options, "options", {})[tostring(i)].spot_instance_termination_action, lookup(var.pn_options, "spot_instance_termination_action", local.defaults.spot_instance_termination_action))
     }
   ]
 
@@ -66,6 +74,8 @@ locals {
       zone = try(lookup(var.en_options, "options", {})[tostring(i)].zone, lookup(var.en_options, "zone", null))
       network = try(lookup(var.en_options, "options", {})[tostring(i)].network, lookup(var.en_options, "network", local.defaults.network))
       subnetwork = try(lookup(var.en_options, "options", {})[tostring(i)].subnetwork, lookup(var.en_options, "subnetwork", local.defaults.subnetwork))
+      spot = try(lookup(var.en_options, "options", {})[tostring(i)].spot, try(lookup(var.en_options, "options", {})[tostring(i)].spot_vm, try(lookup(var.en_options, "options", {})[tostring(i)].preemptible, try(var.en_options.spot, try(var.en_options.spot_vm, try(var.en_options.preemptible, false))))))
+      spot_instance_termination_action = try(lookup(var.en_options, "options", {})[tostring(i)].spot_instance_termination_action, lookup(var.en_options, "spot_instance_termination_action", local.defaults.spot_instance_termination_action))
     }
   ]
 

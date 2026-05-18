@@ -14,6 +14,8 @@ module "cn" {
   use_public_ip = true
   region        = local.cn_node_settings[count.index].region
   network_tier  = var.network_tier
+  spot          = local.cn_node_settings[count.index].spot
+  spot_instance_termination_action = local.cn_node_settings[count.index].spot_instance_termination_action
 
   boot_disk = {
     image_id       = var.boot_image_id
@@ -53,6 +55,8 @@ module "pn" {
   use_public_ip = true
   region        = local.pn_node_settings[count.index].region
   network_tier  = var.network_tier
+  spot          = local.pn_node_settings[count.index].spot
+  spot_instance_termination_action = local.pn_node_settings[count.index].spot_instance_termination_action
 
   boot_disk = {
     image_id       = var.boot_image_id
@@ -92,6 +96,8 @@ module "en" {
   use_public_ip = true
   region        = local.en_node_settings[count.index].region
   network_tier  = var.network_tier
+  spot          = local.en_node_settings[count.index].spot
+  spot_instance_termination_action = local.en_node_settings[count.index].spot_instance_termination_action
 
   boot_disk = {
     image_id       = var.boot_image_id
@@ -127,6 +133,8 @@ module "monitor" {
   use_public_ip = true
   region        = local.monitor_settings.region
   network_tier  = var.network_tier
+  spot          = local.monitor_settings.spot
+  spot_instance_termination_action = local.monitor_settings.spot_instance_termination_action
 
   boot_disk = {
     image_id       = var.boot_image_id
